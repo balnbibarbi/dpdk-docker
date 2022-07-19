@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pktgen
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[ {"name": "sriov-dpdk-n3","interface":"eth2"}, {"name": "sriov-dpdk-n6","interface":"eth1"} ]'
+spec:
+  nodeSelector:
+    test: "true"
+  containers:
+  - name: pktgen
+    image: bingbangboo/pktgen:latest
+    command: [ "/bin/bash", "-c", "--" ]
+    args: [ "while true; do sleep 30; done;" ]
+    securityContext:
+      privileged: true
+      runAsUser: 0
+    resources:
+      limits:
+        cpu: "12"
+        hugepages-2Mi: 32Gi
+        intel.com/sriovn3: "1"
+        intel.com/sriovn6: "1"
+        memory: 16Gi
+      requests:
+        cpu: "12"
+        hugepages-2Mi: 32Gi
+        intel.com/sriovn3: "1"
+        intel.com/sriovn6: "1"
+        memory: 16Gi
+    volumeMounts:
+    - mountPath: /dev/hugepages
+      name: hugepages
+  volumes:
+  - hostPath:
+      path: /dev/hugepages
+      type: ""
+    name: hugepages
